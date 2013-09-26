@@ -3248,6 +3248,10 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
 #pragma mark - Center corner radius
 
 - (void)setCenterViewCornerRadius:(CGFloat)centerViewCornerRadius {
+    if (centerViewCornerRadius == _centerViewCornerRadius) {
+        return;
+     }
+    
     _centerViewCornerRadius = centerViewCornerRadius;
     [self applyCenterViewCornerRadiusAnimated:NO];
 }
@@ -3277,6 +3281,10 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
     UIBezierPath* path = [self generateCenterViewCornerRadiusPath];
 
     if (!self.slidingControllerView.layer.mask) {
+        if (_centerViewCornerRadius == 0) {
+            return;
+        }
+        
         self.slidingControllerView.layer.mask = [CAShapeLayer layer];
         ((CAShapeLayer*)self.slidingControllerView.layer.mask).path = [path CGPath];
     }
