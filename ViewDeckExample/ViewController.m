@@ -161,7 +161,7 @@
     }
     
     cell.textLabel.textAlignment = indexPath.section ? UITextAlignmentRight : UITextAlignmentLeft;
-    cell.textLabel.text = [NSString stringWithFormat:@"ledge: %d", indexPath.row*44];
+    cell.textLabel.text = [NSString stringWithFormat:@"ledge: %ld", (long)(indexPath.row*44)];
     
     return cell;
 }
