@@ -440,7 +440,7 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
     self.originalShadowColor = nil;
     self.originalShadowOffset = CGSizeZero;
     self.originalShadowPath = nil;
-    
+
     _slidingController = nil;
     self.referenceView = nil;
     self.centerView = nil;
@@ -450,6 +450,15 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
 - (void)dealloc {
     [self cleanup];
     
+    // double check we've removed observation before nilling out the centerController
+    @try {
+        [self.centerController removeObserver:self forKeyPath:@"title"];
+        [self.centerController removeObserver:self forKeyPath:@"tabBarItem.title"];
+        [self.centerController removeObserver:self forKeyPath:@"tabBarItem.image"];
+        [self.centerController removeObserver:self forKeyPath:@"hidesBottomBarWhenPushed"];
+    } @catch(id anException) {
+        
+    }
     self.centerController.viewDeckController = nil;
     self.centerController = nil;
     self.leftController.viewDeckController = nil;
@@ -458,6 +467,18 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
     self.rightController = nil;
     self.panners = nil;
     
+    // observations related to UIViewController properties
+    @try {
+        [self removeObserver:self forKeyPath:@"parentViewController"];
+        [self removeObserver:self forKeyPath:@"presentingViewController"];
+    } @catch(id anException) {
+        
+    }
+    @try {
+        [self.view removeObserver:self forKeyPath:@"bounds"];
+    } @catch(id anException) {
+    
+    }
 #if !II_ARC_ENABLED
     [super dealloc];
 #endif
