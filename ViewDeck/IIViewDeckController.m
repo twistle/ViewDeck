@@ -182,8 +182,6 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
 @property (nonatomic, retain) UIButton* centerTapper;
 @property (nonatomic, retain) UIView* centerView;
 @property (nonatomic, readonly) UIView* slidingControllerView;
-@property (nonatomic, assign) BOOL isObservingView;
-@property (nonatomic, assign) BOOL isObservingSelf;
 
 - (void)cleanup;
 - (uint)sideControllerCount;
@@ -457,22 +455,16 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
     self.panners = nil;
     
     // observations related to UIViewController properties
-    if (self.isObservingSelf) {
-        @try {
-            [self removeObserver:self forKeyPath:@"parentViewController"];
-            [self removeObserver:self forKeyPath:@"presentingViewController"];
-            self.isObservingSelf = NO;
-        } @catch(id anException) {
-            
-        }
+    @try {
+        [self removeObserver:self forKeyPath:@"parentViewController"];
+        [self removeObserver:self forKeyPath:@"presentingViewController"];
+    } @catch(id anException) {
+        
     }
-    if (self.isObservingView) {
-        @try {
-            [self.view removeObserver:self forKeyPath:@"bounds"];
-            self.isObservingView = NO;
-        } @catch(id anException) {
-            
-        }
+    @try {
+        [self.view removeObserver:self forKeyPath:@"bounds"];
+    } @catch(id anException) {
+    
     }
 #if !II_ARC_ENABLED
     [super dealloc];
@@ -919,7 +911,6 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
     [super viewWillAppear:animated];
     
     [self.view addObserver:self forKeyPath:@"bounds" options:NSKeyValueObservingOptionNew context:nil];
-    self.isObservingView = YES;
 
     if (!_viewFirstAppeared) {
         _viewFirstAppeared = YES;
@@ -1009,13 +1000,10 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
     if (self.navigationControllerBehavior == IIViewDeckNavigationControllerIntegrated)
         _willAppearOffset = self.slidingControllerView.frame.origin;
 
-    if (self.isObservingView) {
-        @try {
-            [self.view removeObserver:self forKeyPath:@"bounds"];
-            self.isObservingView = NO;
-        } @catch(id anException){
-            //do nothing, obviously it wasn't attached because an exception was thrown
-        }
+    @try {
+        [self.view removeObserver:self forKeyPath:@"bounds"];
+    } @catch(id anException){
+        //do nothing, obviously it wasn't attached because an exception was thrown
     }
     
     if ([self safe_shouldManageAppearanceMethods]) [self.centerController viewDidDisappear:animated];
@@ -3219,7 +3207,6 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
             II_RETAIN(_finishTransitionBlocks);
             [self addObserver:self forKeyPath:@"parentViewController" options:0 context:nil];
             [self addObserver:self forKeyPath:@"presentingViewController" options:0 context:nil];
-            self.isObservingSelf = YES;
         }
         [_finishTransitionBlocks addObject:finishTransition];
     }
@@ -3229,15 +3216,8 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
     if (!self.referenceView) return;
     
     if (_finishTransitionBlocks) {
-        if (self.isObservingSelf) {
-            @try {
-                [self removeObserver:self forKeyPath:@"parentViewController" context:nil];
-                [self removeObserver:self forKeyPath:@"presentingViewController" context:nil];
-                self.isObservingSelf = NO;
-            } @catch (id anException) {
-                
-            }
-        }
+        [self removeObserver:self forKeyPath:@"parentViewController" context:nil];
+        [self removeObserver:self forKeyPath:@"presentingViewController" context:nil];
         
         for (void(^finishTransition)(void) in _finishTransitionBlocks) {
             finishTransition();
