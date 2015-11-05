@@ -3216,8 +3216,12 @@ static NSTimeInterval durationToAnimate(CGFloat pointsToAnimate, CGFloat velocit
     if (!self.referenceView) return;
     
     if (_finishTransitionBlocks) {
-        [self removeObserver:self forKeyPath:@"parentViewController" context:nil];
-        [self removeObserver:self forKeyPath:@"presentingViewController" context:nil];
+        @try {
+            [self removeObserver:self forKeyPath:@"parentViewController" context:nil];
+            [self removeObserver:self forKeyPath:@"presentingViewController" context:nil];
+        } @catch (id anException) {
+
+        }
         
         for (void(^finishTransition)(void) in _finishTransitionBlocks) {
             finishTransition();
